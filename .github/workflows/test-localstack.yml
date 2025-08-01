@@ -15,9 +15,10 @@ jobs:
 
     services:
       redis:
-        image: redis:7
+        image: redis:7-alpine
         ports:
           - 6379:6379
+           
       # minio:
       #   image: minio/minio
       #   command: server /data
@@ -26,6 +27,7 @@ jobs:
       #     MINIO_ROOT_PASSWORD: minio123
       #   ports:
       #     - 9000:9000
+       
       localstack:
         image: localstack/localstack:3
         ports:
@@ -35,6 +37,7 @@ jobs:
           DEBUG: 1
 
     env:
+        NODE_ENV: test
         AWS_ACCESS_KEY_ID: test
         AWS_SECRET_ACCESS_KEY: test
         AWS_REGION: us-east-1
@@ -57,7 +60,8 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        # run: npm install --legacy-peer-deps
+        run: npm ci
 
       - name: Start MinIO container
         run: |
@@ -72,3 +76,28 @@ jobs:
         run: |
           echo "Test env running on LocalStack"
           npm run test
+ 
+
+# 2. Verificación de servicios antes de tests
+# - name: Wait for services to be ready
+#   run: |
+#     echo "Waiting for LocalStack..."
+#     for i in {1..30}; do
+#       curl -s http://localhost:4566/health | grep "running" && break
+#       echo "Waiting for LocalStack... ($i/30)"
+#       sleep 2
+#     done
+    
+#     echo "Waiting for Redis..."
+#     for i in {1..10}; do
+#       redis-cli -h localhost ping && break
+#       echo "Waiting for Redis... ($i/10)"
+#       sleep 2
+#     done
+    
+#     echo "Waiting for MinIO..."
+#     for i in {1..10}; do
+#       curl -s http://localhost:9000/minio/health/live && break
+#       echo "Waiting for MinIO... ($i/10)"
+#       sleep 2
+#     done
