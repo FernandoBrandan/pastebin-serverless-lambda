@@ -1,15 +1,11 @@
 # Pastebin Serverless
 
-- Servicio API de pastebin ultra liviana construida con AWS Lambda, DynamoDB, MinIO y Redis.
-- Contiene desarrollo backend en la nube, incluyendo autenticación, almacenamiento distribuido, y cacheo inteligente.
+Servicio API de pastebin ultra liviana construida con AWS Lambda, DynamoDB, MinIO y Redis.
+Contiene desarrollo backend en la nube, incluyendo autenticación, almacenamiento distribuido, y cacheo inteligente.
 
 ## Qué hace este sistema
 
-- Los usuarios pueden crear "pastes" (fragmentos de texto o código) y compartirlos mediante una URL única.
-- Soporta niveles de expiración, visibilidad (público, privado, oculto) y control de acceso por tipo de usuario (free/premium).
-- Autenticación JWT y almacenamiento de usuarios en DynamoDB.
-- Uso de MinIO como almacenamiento de objetos y Redis como sistema de cache.
-- MinIO como reemplazo a S3
+Los usuarios pueden crear "pastes" (fragmentos de texto o código) y compartirlos mediante una URL única. Soporta niveles de expiración, visibilidad (público, privado, oculto) y control de acceso por tipo de usuario (free/premium). El sistema incluye autenticación JWT y almacenamiento de usuarios en DynamoDB, uso de MinIO como almacenamiento de objetos y Redis como sistema de cache.
 
 ## Tecnologías utilizadas
 
@@ -33,43 +29,56 @@
 - **Regeneración de IDs únicos tipo Base62**
 - **Desplegable en AWS con Serverless Framework**
 
+## Arquitectura y entorno de desarrollo
+
+Todos los servicios se levantan con docker-compose, lo cual permite replicar un entorno de producción local en segundos. El sistema utiliza Serverless Framework con funciones Lambda, DynamoDB, S3 y Redis, emulados mediante LocalStack, MinIO y Redis para desarrollo local.
+
+## Testing y CI/CD
+
+**Testing Automatizado:** Se incluyen pruebas e2e (end-to-end) con usuarios reales (registro + login), validando que el flujo completo funcione correctamente.
+
+**Test CI/CD con GitHub Actions:** Integración continua al hacer push/pull request sobre main, ejecutando tests de extremo a extremo con Jest y supertest.
+
+**Despliegue desacoplado:** Separación clara entre workflows de test (test-localstack.yml) y de deploy (deploy.yml).
+
 ## Cómo probarlo localmente
 
-1. **Requisitos**
+### Requisitos
 
-   - Docker + docker-compose
-   - Node.js 20+
-   - Serverless Framework
-   - `minio`, `redis` y `localstack` corriendo en local (simulan los servicios AWS)
+- Docker + docker-compose
+- Node.js 20+
+- Serverless Framework
+- `minio`, `redis` y `localstack` corriendo en local (simulan los servicios AWS)
 
-2. **Instalar dependencias**
+### Instalación y ejecución
+
+1. **Instalar dependencias**
 
    ```bash
    npm install
    ```
 
-3. **Levantar entorno**
+2. **Levantar entorno**
 
    ```bash
    docker-compose up
    ```
 
-4. **Ejecutar el backend**
-
+3. **Ejecutar el backend**
    ```bash
    sls offline start
    ```
 
-5. **Endpoints disponibles**
+### Endpoints disponibles
 
-   - `POST /api/v1/register` → Crear usuario
-   - `POST /api/v1/login` → Obtener JWT
-   - `POST /api/v1/pastes` → Crear nuevo paste (con token)
-   - `GET /api/v1/pastes?pasteId=xyz` → Obtener contenido (con cache)
+- `POST /api/v1/register` → Crear usuario
+- `POST /api/v1/login` → Obtener JWT
+- `POST /api/v1/pastes` → Crear nuevo paste (con token)
+- `GET /api/v1/pastes?pasteId=xyz` → Obtener contenido (con cache)
 
-# Test
+## Ejemplos de uso
 
-1.  **Registro de usuario**
+### 1. Registro de usuario
 
 ```bash
 curl -X POST http://localhost:3000/local/api/v1/register \
@@ -80,7 +89,7 @@ curl -X POST http://localhost:3000/local/api/v1/register \
   }'
 ```
 
-2. **Login y obtener JWT**
+### 2. Login y obtener JWT
 
 ```bash
 curl -X POST http://localhost:3000/local/api/v1/login \
@@ -93,7 +102,7 @@ curl -X POST http://localhost:3000/local/api/v1/login \
 
 > Guardá el `token` JWT que te devuelve para los siguientes pasos.
 
-3. **Crear un paste (anónimo / sin login)**
+### 3. Crear un paste (anónimo / sin login)
 
 ```bash
 curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
@@ -107,7 +116,7 @@ curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
   }'
 ```
 
-4. **Crear paste privado (requiere login)**
+### 4. Crear paste privado (requiere login)
 
 ```bash
 curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
@@ -124,7 +133,7 @@ curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
 
 > Reemplazá `<JWT_TOKEN>` por el valor que obtuviste en el login.
 
-5.  **Crear paste con expiración larga (requiere **usuario premium**)**
+### 5. Crear paste con expiración larga (requiere usuario premium)
 
 ```bash
 curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
@@ -141,36 +150,10 @@ curl -X POST http://localhost:3000/local/api/v1/pastes/api/v1/pastes \
 
 > Asegurate de que el usuario tenga `plan: "premium"` en DynamoDB, o simulalo manualmente por ahora.
 
-6.  **Obtener paste (por ID)**
+### 6. Obtener paste (por ID)
 
 ```bash
 curl -X GET "http://localhost:3000/local/api/v1/pastes/api/v1/pastes?pasteId=<PASTE_ID>"
 ```
 
-Reemplazá `<PASTE_ID>` por el ID que obtuviste en el paso 3, 4 o 5.
-
-INTEGRAR
-
----
-
-# Test CI/CD con GitHub Actions
-
-Integración continua al hacer push/pull request sobre main, ejecutando tests de extremo a extremo con Jest y supertest.
-
----
-
-- Uso de Serverless Framework con funciones Lambda, DynamoDB, S3 y Redis, emulados mediante LocalStack, MinIO y Redis.
-
----
-
-Todos los servicios se levantan con docker-compose, lo cual permite replicar un entorno de producción local en segundos.
-
----
-
-Testing Automatizado:
-Se incluyen pruebas e2e (end-to-end) con usuarios reales (registro + login), validando que el flujo completo funcione correctamente.
-
----
-
-Despliegue desacoplado:
-Separación clara entre workflows de test (test-localstack.yml) y de deploy (deploy.yml, aún pendiente de activación), siguiendo buenas prácticas de CI/CD.
+Reemplazá `<PASTE_ID>` por el ID que obtuviste en los pasos anteriores.
