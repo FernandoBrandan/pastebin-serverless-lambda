@@ -1,0 +1,69 @@
+service: pastebin-local
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: local
+  region: us-east-1 
+  s3:
+    pastebinBucket:
+      name: pastebin-bucket
+      corsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: ['GET', 'PUT', 'POST']
+            AllowedOrigins: ['*']
+            MaxAge: 3000
+  environment:
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    BUCKET_NAME: pastes
+    DYNAMODB_TABLE: Paste
+
+plugins:
+  - serverless-localstack
+  - serverless-offline
+
+custom:
+  localstack:
+    stages:
+      - dev
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+    lambda:
+      mountCode: True  # Para evitar empaquetado ZIP y usar código local
+  serverless-offline:
+    httpPort: 3000
+  dynamodb:
+    endpoint: http://localhost:4566
+  s3:
+    endpoint: http://localhost:4566
+
+functions:
+  createPaste:
+    handler: src/handlers/createPaste.create_paste
+    events:
+      - http:
+          path: api/v1/pastes
+          method: post
+  getPaste:
+    handler: src/handlers/getPaste.get_paste
+    events:
+      - http:
+          path: api/v1/pastes
+          method: get
+  register:
+    handler: src/handlers/authRegister.register
+    events:
+      - http:
+          path: api/v1/register
+          method: post
+  login:
+    handler: src/handlers/authLogin.login
+    events:
+      - http:
+          path: api/v1/login
+          method: post

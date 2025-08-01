@@ -1,0 +1,75 @@
+# name: CI - Pastebin Backend Tests
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+
+#     services:
+#       localstack:
+#         image: localstack/localstack:latest
+#         ports:
+#           - 4566:4566
+#         options: >-
+#           --health-cmd="curl -f http://localhost:4566/health || exit 1"
+#           --health-interval=10s
+#           --health-timeout=5s
+#           --health-retries=5
+
+#       redis:
+#         image: redis:7-alpine
+#         ports:
+#           - 6379:6379
+#         options: >-
+#           --health-cmd "redis-cli ping"
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
+
+#     env:
+#       AWS_ACCESS_KEY_ID: test
+#       AWS_SECRET_ACCESS_KEY: test
+#       AWS_REGION: us-east-1
+#       LOCALSTACK_HOST: localhost
+#       REDIS_HOST: localhost
+#       REDIS_PORT: 6379
+#       NODE_ENV: test
+
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v3
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18.x
+#           cache: 'npm'
+
+#       - name: Install dependencies
+#         run: npm ci
+
+#       - name: Wait for LocalStack and Redis to be healthy
+#         run: |
+#           for i in {1..10}; do
+#             curl -s http://localhost:4566/health | grep "running" && break || sleep 5
+#           done
+#           redis-cli -h localhost ping
+
+#       - name: Run Vitest tests
+#         env:
+#           AWS_ENDPOINT: http://localhost:4566
+#           REDIS_HOST: localhost
+#           REDIS_PORT: 6379
+#         run: npm run test:e2e
+
+#       - name: Upload test results (optional)
+#         if: failure()
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: test-logs
+#           path: ./tests/test-results/

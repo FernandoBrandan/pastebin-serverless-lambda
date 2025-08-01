@@ -1,0 +1,72 @@
+name: Test with LocalStack
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+      # minio:
+      #   image: minio/minio
+      #   command: server /data
+      #   env:
+      #     MINIO_ROOT_USER: minio
+      #     MINIO_ROOT_PASSWORD: minio123
+      #   ports:
+      #     - 9000:9000
+      localstack:
+        image: localstack/localstack:3
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: dynamodb,s3
+          DEBUG: 1
+
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      JWT_SECRET: test
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start MinIO container
+        run: |
+          docker run -d -p 9000:9000 -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 minio/minio server /data
+
+      - name: Start Serverless Offline
+        run: |
+          npx serverless offline &
+          sleep 10
+
+      - name: Run tests with LocalStack
+        run: |
+          echo "Test env running on LocalStack"
+          npm run test

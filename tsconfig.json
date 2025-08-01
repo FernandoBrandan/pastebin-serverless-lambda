@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                     // Compatibilidad con características modernas
+    "module": "CommonJS",                   // Para usar en Node.js
+    "outDir": "./dist",                     // Carpeta de salida de archivos compilados
+    "rootDir": "./src",                     // Carpeta de tus archivos fuente
+    "strict": true,                         // Activa todas las comprobaciones estrictas
+    "esModuleInterop": true,                // Para importar módulos CommonJS como express
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",                  // Mejora tiempos de compilación ignorando tipos de node_modules
+  },
+  "include": ["src/**/*"],                  // Archivos a incluir
+  "exclude": ["node_modules", "dist"]       // Archivos a excluir
+}
+

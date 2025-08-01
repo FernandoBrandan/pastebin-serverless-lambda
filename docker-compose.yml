@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7
+    container_name: pastebin_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: pastebin_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Web UI
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: pastebin_localstack
+    ports:
+      - "4566:4566" # Endpoint de todos los servicios
+      - "4571:4571" # Edge port legacy
+    environment:
+      - SERVICES=lambda,apigateway,dynamodb,s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - ./localstack:/etc/localstack/init/ready.d
+      - localstack_data:/var/lib/localstack/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  minio_data:
+  localstack_data:
