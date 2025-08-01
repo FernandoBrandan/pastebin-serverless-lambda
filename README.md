@@ -148,3 +148,29 @@ curl -X GET "http://localhost:3000/local/api/v1/pastes/api/v1/pastes?pasteId=<PA
 ```
 
 Reemplazá `<PASTE_ID>` por el ID que obtuviste en el paso 3, 4 o 5.
+
+INTEGRAR
+
+---
+
+# Test CI/CD con GitHub Actions
+
+Integración continua al hacer push/pull request sobre main, ejecutando tests de extremo a extremo con Jest y supertest.
+
+---
+
+- Uso de Serverless Framework con funciones Lambda, DynamoDB, S3 y Redis, emulados mediante LocalStack, MinIO y Redis.
+
+---
+
+Todos los servicios se levantan con docker-compose, lo cual permite replicar un entorno de producción local en segundos.
+
+---
+
+Testing Automatizado:
+Se incluyen pruebas e2e (end-to-end) con usuarios reales (registro + login), validando que el flujo completo funcione correctamente.
+
+---
+
+Despliegue desacoplado:
+Separación clara entre workflows de test (test-localstack.yml) y de deploy (deploy.yml, aún pendiente de activación), siguiendo buenas prácticas de CI/CD.

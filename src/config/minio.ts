@@ -1,11 +1,13 @@
 import * as Minio from 'minio'
+
 export const clientMinio = new Minio.Client({
-    endPoint: 'localhost', //minio
-    port: 9000,
+    endPoint: process.env.MINIO_ENDPOINT || 'localhost',
+    port: parseInt(process.env.MINIO_PORT || '9000', 10),
     useSSL: false,
-    accessKey: 'minio',
-    secretKey: 'minio123',
+    accessKey: process.env.MINIO_ACCESS_KEY || 'minio',
+    secretKey: process.env.MINIO_SECRET_KEY || 'minio123',
 })
+
 
 export const validateBucket = async () => {
     const bucketName = 'pastes'

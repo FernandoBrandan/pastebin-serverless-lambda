@@ -1,5 +1,8 @@
 import Redis from 'ioredis'
-// export const clientRedis = new Redis({ host: 'redis', port: 6379, })
-export const clientRedis = new Redis({ host: 'localhost', port: 6379, })
+
+const redisHost = process.env.REDIS_HOST || 'localhost'
+const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10)
+export const clientRedis = new Redis({ host: redisHost, port: redisPort })
+
 clientRedis.on('connect', () => console.log('Redis connected'))
 clientRedis.on('error', (err) => console.error('Redis error', err))

@@ -11,7 +11,7 @@
   - Linter (eslint, prettier).
   - Type check si usás TS.
   - Unit tests (sin depender de infra).
-  - Coverage (jest --coverage).
+  - Coverage (jest --coverage). Ayuda a detectar código muerto
 - Puede correr en paralelo o antes del Test with LocalStack.
 
 # Tercer paso - deploy.yml:
